@@ -208,7 +208,7 @@ public class GoGameClient extends Application {
 				s = new Socket("192.168.1.83",Const.PORT);
 				in = new DataInputStream(s.getInputStream());
 				out = new DataOutputStream(s.getOutputStream());
-				
+				System.out.println("Successful Connection Made");
 				
 				boolean done = false;
 				while(!done) {
