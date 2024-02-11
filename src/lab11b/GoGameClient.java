@@ -31,7 +31,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
-import lab11b.Constants;
+import lab11b.Shared_Elements.*;
 
 /**
  * The GoGameClient class joins a simple game of GO
@@ -45,12 +45,12 @@ public class GoGameClient extends Application {
 	Pane root;
 	DrawBoard board;
 	
-	private static boolean[][] added = new boolean[Constants.NUMBER_OF_ROWS][Constants.NUMBER_OF_ROWS];
-	private static Ellipse[][] stones = new Ellipse[Constants.NUMBER_OF_ROWS][Constants.NUMBER_OF_ROWS];
+	private static boolean[][] added = new boolean[Const.NUMBER_OF_ROWS][Const.NUMBER_OF_ROWS];
+	private static Ellipse[][] stones = new Ellipse[Const.NUMBER_OF_ROWS][Const.NUMBER_OF_ROWS];
 	
 	private static Text timeViolations;
 	private int noOfTimeViolations = 0;
-	private static PenaltyTimer timer = new GoGameClient().new PenaltyTimer();//see if this works
+	private static PenaltyTimer timer = new GoGameClient().new PenaltyTimer();
 	
 	private final int REFRESH_LIMIT = 10; // 10/60 seconds
 	private int refreshCountDown = REFRESH_LIMIT;
@@ -61,7 +61,6 @@ public class GoGameClient extends Application {
 	
 	private static Text youText;
 	private static Text oppText;
-	private boolean localNameSet = false;
 	
 	private GoGameClientService clientService;
 
@@ -83,8 +82,8 @@ public class GoGameClient extends Application {
 		
 		
 		// Initialize all the stones to null;
-		for(int row = 0; row < Constants.NUMBER_OF_ROWS; row++) {
-			for(int col = 0; col < Constants.NUMBER_OF_ROWS; col++) {
+		for(int row = 0; row < Const.NUMBER_OF_ROWS; row++) {
+			for(int col = 0; col < Const.NUMBER_OF_ROWS; col++) {
 				stones[row][col] = null;
 			}
 		}
@@ -92,7 +91,7 @@ public class GoGameClient extends Application {
 		root = new Pane();
 		drawAll();
 	
-		Scene scene = new Scene(root, Constants.SCENE_WIDTH, Constants.SCENE_HEIGHT);
+		Scene scene = new Scene(root, Const.SCENE_WIDTH, Const.SCENE_HEIGHT);
 
 		// Set up fresh and start
 		refreshCount = new Refresh();
@@ -117,7 +116,7 @@ public class GoGameClient extends Application {
 		
 		timeViolations = new Text("Time Violations: " + noOfTimeViolations);	
 		youText = new Text("Your name: ");
-		HBox playerInfo = new HBox(Constants.BOARD_LENGTH / 2, timeViolations, youText);		
+		HBox playerInfo = new HBox(Const.BOARD_LENGTH / 2, timeViolations, youText);		
 		
 		board = new DrawBoard();
 		
@@ -147,9 +146,9 @@ public class GoGameClient extends Application {
 		public DrawBoard() {
 			
 			// Draw rows and columns of stones
-			for(int row = 0; row < Constants.NUMBER_OF_ROWS; row++) {
-				for(int col = 0; col < Constants.NUMBER_OF_ROWS; col++) {
-					Rectangle r = new Rectangle(col * Constants.SQUARE_LENGTH, row * Constants.SQUARE_LENGTH, Constants.SQUARE_LENGTH, Constants.SQUARE_LENGTH);
+			for(int row = 0; row < Const.NUMBER_OF_ROWS; row++) {
+				for(int col = 0; col < Const.NUMBER_OF_ROWS; col++) {
+					Rectangle r = new Rectangle(col * Const.SQUARE_LENGTH, row * Const.SQUARE_LENGTH, Const.SQUARE_LENGTH, Const.SQUARE_LENGTH);
 					r.setFill(Color.GREEN);
 					r.setStroke(Color.BLACK);
 					
@@ -176,8 +175,8 @@ public class GoGameClient extends Application {
 				refreshCountDown = REFRESH_LIMIT;
 			
 				// Add the new stones to the board
-				for(int row = 0; row < Constants.NUMBER_OF_ROWS; row++) {
-					for(int col = 0; col < Constants.NUMBER_OF_ROWS; col++) {
+				for(int row = 0; row < Const.NUMBER_OF_ROWS; row++) {
+					for(int col = 0; col < Const.NUMBER_OF_ROWS; col++) {
 						if(stones[row][col] != null && !added[row][col]) {
 						
 							board.getChildren().add(stones[row][col]);
@@ -201,13 +200,12 @@ public class GoGameClient extends Application {
 		private static DataOutputStream out;
 		private static DataInputStream in;
 		
-		private static final int PORT = 1150;
 		@Override
 		public void run() {
 			
 			try {
 				
-				s = new Socket("localhost",PORT);
+				s = new Socket("192.168.1.83",Const.PORT);
 				in = new DataInputStream(s.getInputStream());
 				out = new DataOutputStream(s.getOutputStream());
 				
@@ -272,10 +270,10 @@ public class GoGameClient extends Application {
 				x = playReader.nextInt();
 				y = playReader.nextInt();
 				
-				int row = (int)(y/(int)Constants.SQUARE_LENGTH);
-				int col = (int)(x/(int)Constants.SQUARE_LENGTH);
+				int row = (int)(y/(int)Const.SQUARE_LENGTH);
+				int col = (int)(x/(int)Const.SQUARE_LENGTH);
 				
-				Ellipse stone = new Ellipse(x+Constants.SQUARE_LENGTH/2,y+Constants.SQUARE_LENGTH/2,Constants.STONE_RADIUS,Constants.STONE_RADIUS);
+				Ellipse stone = new Ellipse(x+Const.SQUARE_LENGTH/2,y+Const.SQUARE_LENGTH/2,Const.STONE_RADIUS,Const.STONE_RADIUS);
 				//The Server's stones are white
 				stone.setFill(Color.WHITE);
 				
@@ -324,7 +322,7 @@ public class GoGameClient extends Application {
 	 */
 	private static void addStone(double x,double y,Color color,int row,int col) {
 		
-		Ellipse stone = new Ellipse(x,y,Constants.STONE_RADIUS,Constants.STONE_RADIUS);
+		Ellipse stone = new Ellipse(x,y,Const.STONE_RADIUS,Const.STONE_RADIUS);
 		stone.setFill(color);
 		
 		//update the stones arrays for the refresh to check
@@ -351,11 +349,11 @@ public class GoGameClient extends Application {
 			//System.out.println(e.getSource().toString());
 			
 			//establish x and y location of the stone in the center of the square
-			double xPos = r.getX()+Constants.SQUARE_LENGTH/2;
-			double yPos = r.getY()+Constants.SQUARE_LENGTH/2;
+			double xPos = r.getX()+Const.SQUARE_LENGTH/2;
+			double yPos = r.getY()+Const.SQUARE_LENGTH/2;
 			
-			int row = (int)(r.getY()/Constants.SQUARE_LENGTH);
-			int col = (int)(r.getX()/Constants.SQUARE_LENGTH);
+			int row = (int)(r.getY()/Const.SQUARE_LENGTH);
+			int col = (int)(r.getX()/Const.SQUARE_LENGTH);
 			
 			//System.out.println(xPos);
 			
@@ -363,14 +361,6 @@ public class GoGameClient extends Application {
 				
 				
 				addStone(xPos,yPos,Color.BLACK,row,col);
-				/*Ellipse stone = new Ellipse(xPos,yPos,STONE_RADIUS,STONE_RADIUS);
-				stone.setFill(Color.BLACK);
-				
-				//update the stones arrays for the refresh to check
-				stones[row][col] = stone;
-				
-				isTurn = false;
-				*/
 				try {
 					
 					//inform server of the turn

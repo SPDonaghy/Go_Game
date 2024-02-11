@@ -29,7 +29,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
-import lab11b.Constants;
+import lab11b.Shared_Elements.*;
 
 
 /**
@@ -43,12 +43,12 @@ public class GoGameServer extends Application {
 	Pane root;
 	DrawBoard board;
 	
-	private static boolean[][] added = new boolean[Constants.NUMBER_OF_ROWS][Constants.NUMBER_OF_ROWS];
-	private static Ellipse[][] stones = new Ellipse[Constants.NUMBER_OF_ROWS][Constants.NUMBER_OF_ROWS];
+	private static boolean[][] added = new boolean[Const.NUMBER_OF_ROWS][Const.NUMBER_OF_ROWS];
+	private static Ellipse[][] stones = new Ellipse[Const.NUMBER_OF_ROWS][Const.NUMBER_OF_ROWS];
 	
 	private static Text timeViolations;
 	private int noOfTimeViolations = 0;
-	private static PenaltyTimer timer = new GoGameServer().new PenaltyTimer();//see if this works
+	private static PenaltyTimer timer = new GoGameServer().new PenaltyTimer();
 	
 	private final int REFRESH_LIMIT = 10; // 10/60 seconds
 	private int refreshCountDown = REFRESH_LIMIT;
@@ -64,9 +64,9 @@ public class GoGameServer extends Application {
 	private String color = "White";
 	
 	private static boolean isTurn;
+	
 	/**
-	 * Start method to draw the graphic interface and initialize
-	 * the server thread
+	 * Method to draw the graphic interface and initialize server thread
 	 */
 	@Override
 	public void start(Stage primaryStage) {
@@ -77,11 +77,9 @@ public class GoGameServer extends Application {
 		serverService = new GoGameServer().new GoGameServerService();
 		Thread t = new Thread(serverService);
 		
-		
-		
 		// Initialize all the stones to null;
-		for(int row = 0; row < Constants.NUMBER_OF_ROWS; row++) {
-			for(int col = 0; col < Constants.NUMBER_OF_ROWS; col++) {
+		for(int row = 0; row < Const.NUMBER_OF_ROWS; row++) {
+			for(int col = 0; col < Const.NUMBER_OF_ROWS; col++) {
 				stones[row][col] = null;
 			}
 		}
@@ -89,7 +87,7 @@ public class GoGameServer extends Application {
 		root = new Pane();
 		drawAll();
 	
-		Scene scene = new Scene(root, Constants.SCENE_WIDTH, Constants.SCENE_HEIGHT);
+		Scene scene = new Scene(root, Const.SCENE_WIDTH, Const.SCENE_HEIGHT);
 
 		// Set up fresh and start
 		refreshCount = new Refresh();
@@ -114,7 +112,7 @@ public class GoGameServer extends Application {
 		
 		timeViolations = new Text("Time Violations: " + noOfTimeViolations);	
 		youText = new Text("Your name: ");
-		HBox playerInfo = new HBox(Constants.BOARD_LENGTH / 2, timeViolations, youText);		
+		HBox playerInfo = new HBox(Const.BOARD_LENGTH / 2, timeViolations, youText);		
 		
 		board = new DrawBoard();
 		
@@ -144,9 +142,9 @@ public class GoGameServer extends Application {
 		public DrawBoard() {
 
 			// Draw rows and columns of stones
-			for(int row = 0; row < Constants.NUMBER_OF_ROWS; row++) {
-				for(int col = 0; col < Constants.NUMBER_OF_ROWS; col++) {
-					Rectangle r = new Rectangle(col * Constants.SQUARE_LENGTH, row * Constants.SQUARE_LENGTH, Constants.SQUARE_LENGTH, Constants.SQUARE_LENGTH);
+			for(int row = 0; row < Const.NUMBER_OF_ROWS; row++) {
+				for(int col = 0; col < Const.NUMBER_OF_ROWS; col++) {
+					Rectangle r = new Rectangle(col * Const.SQUARE_LENGTH, row * Const.SQUARE_LENGTH, Const.SQUARE_LENGTH, Const.SQUARE_LENGTH);
 					r.setFill(Color.GREEN);
 					r.setStroke(Color.BLACK);
 					
@@ -169,12 +167,12 @@ public class GoGameServer extends Application {
 		
 		private static DataOutputStream out;
 		private static DataInputStream in;
+	
 		
-		final static int PORT = 1150;
 		@Override
 		public void run() {
 			
-			try(ServerSocket server = new ServerSocket(PORT)){
+			try(ServerSocket server = new ServerSocket(Const.PORT)){
 				
 				while(true) {
 					
@@ -193,7 +191,6 @@ public class GoGameServer extends Application {
 							String message = in.readUTF();
 							
 							receiveName(message);
-							//message = in.readUTF();
 							receivePlay(message);
 	
 						}
@@ -239,6 +236,7 @@ public class GoGameServer extends Application {
 			out.writeUTF("PLAY "+x+" "+y);
 			out.flush();
 		}
+
 		/**
 		 * Receive play needs to signal that it is now the reciever's turn
 		 * Then it needs to read the other player's play and update the game
@@ -248,8 +246,6 @@ public class GoGameServer extends Application {
 			
 			if(message.contains("PLAY")) {
 				isTurn = true;
-				
-				
 				
 				Scanner playReader = new Scanner(message);
 				playReader.useDelimiter(" ");
@@ -263,24 +259,20 @@ public class GoGameServer extends Application {
 				y = playReader.nextInt();	
 				playReader.close();
 				
-				int row = (int)(y/Constants.SQUARE_LENGTH);
-				int col = (int)(x/Constants.SQUARE_LENGTH);
+				int row = (int)(y/Const.SQUARE_LENGTH);
+				int col = (int)(x/Const.SQUARE_LENGTH);
 				
-				int xPos = x+Constants.SQUARE_LENGTH/2;
-				int yPos = y+Constants.SQUARE_LENGTH/2;
+				int xPos = x+Const.SQUARE_LENGTH/2;
+				int yPos = y+Const.SQUARE_LENGTH/2;
 				
 				
-				//System.out.println("Play Received from client:\nrow: "+row+"\ncol: "+col);
+				Ellipse stone = new Ellipse(xPos,yPos,Const.STONE_RADIUS,Const.STONE_RADIUS);
 				
-				Ellipse stone = new Ellipse(xPos,yPos,Constants.STONE_RADIUS,Constants.STONE_RADIUS);
 				//The client's stones are black
 				stone.setFill(Color.BLACK);
 				
 				//update the stones arrays for the refresh to check
 				stones[row][col] = stone;
-				
-				//System.out.println(stones[row][col].toString());
-				//System.out.println(added[row][col]);
 				
 				//start the penalty timer as soon as the opponent has made a play
 				timer.start();
@@ -306,14 +298,11 @@ public class GoGameServer extends Application {
 				refreshCountDown = REFRESH_LIMIT;
 			
 				// Add the new stones to the board
-				for(int row = 0; row < Constants.NUMBER_OF_ROWS; row++) {
-					for(int col = 0; col < Constants.NUMBER_OF_ROWS; col++) {
+				for(int row = 0; row < Const.NUMBER_OF_ROWS; row++) {
+					for(int col = 0; col < Const.NUMBER_OF_ROWS; col++) {
 						if(stones[row][col] != null && !added[row][col]) {
 							board.getChildren().add(stones[row][col]);
-							//System.out.println(stones[row][col]);
-							//System.out.println(board.getChildren().toString());
 							added[row][col] = true;
-							//System.out.println(added[row][col]);
 						}
 					}
 				}
@@ -355,7 +344,7 @@ public class GoGameServer extends Application {
 	 */
 	private static void addStone(double x,double y,Color color,int row,int col) {
 		
-		Ellipse stone = new Ellipse(x,y,Constants.STONE_RADIUS,Constants.STONE_RADIUS);
+		Ellipse stone = new Ellipse(x,y,Const.STONE_RADIUS,Const.STONE_RADIUS);
 		stone.setFill(color);
 		
 		//update the stones arrays for the refresh to check
@@ -381,24 +370,16 @@ public class GoGameServer extends Application {
 			
 			//establish x and y location of the stone in the center of the squar
 			//xpos and ypos are the positions of the actual stone
-			double xPos = r.getX()+Constants.SQUARE_LENGTH/2;
-			double yPos = r.getY()+Constants.SQUARE_LENGTH/2;
+			double xPos = r.getX()+Const.SQUARE_LENGTH/2;
+			double yPos = r.getY()+Const.SQUARE_LENGTH/2;
 			
-			int row = (int)(r.getY()/Constants.SQUARE_LENGTH);
-			int col = (int)(r.getX()/Constants.SQUARE_LENGTH);
+			int row = (int)(r.getY()/Const.SQUARE_LENGTH);
+			int col = (int)(r.getX()/Const.SQUARE_LENGTH);
 			
 			if(isTurn&&!added[row][col]) {
 				
 				addStone(xPos,yPos,Color.WHITE,row,col);
-				/*
-				Ellipse stone = new Ellipse(xPos,yPos,STONE_RADIUS,STONE_RADIUS);
-				stone.setFill(Color.WHITE);
-				
-				//update the stones arrays for the refresh to check
-				stones[row][col] = stone;
-				
-				isTurn = false;
-				*/
+		
 				try {
 					
 					//inform server of the turn
@@ -408,10 +389,7 @@ public class GoGameServer extends Application {
 				
 				catch(IOException exception) {
 					exception.printStackTrace();
-				}
-				
-				
-				
+				}	
 			}
 		}
 	}
