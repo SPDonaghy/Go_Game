@@ -199,13 +199,14 @@ public class GoGameClient extends Application {
 		private static Socket s;
 		private static DataOutputStream out;
 		private static DataInputStream in;
+
 		
 		@Override
 		public void run() {
 			
 			try {
 				
-				s = new Socket("192.168.1.83",Const.PORT);
+				s = new Socket("REPLACE WITH IP",Const.PORT);
 				in = new DataInputStream(s.getInputStream());
 				out = new DataOutputStream(s.getOutputStream());
 				System.out.println("Successful Connection Made");
